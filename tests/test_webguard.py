@@ -1,6 +1,8 @@
+import contextlib
+import io
 import unittest
 
-from webguard import analyze_headers, build_report, display_url, validate_url
+from webguard import analyze_headers, build_report, display_url, main, validate_url
 
 
 class ValidateUrlTests(unittest.TestCase):
@@ -21,6 +23,15 @@ class ValidateUrlTests(unittest.TestCase):
     def test_rejects_malformed_port(self):
         with self.assertRaises(ValueError):
             validate_url("https://example.com:bad")
+
+    def test_malformed_host_is_reported_without_traceback(self):
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            result = main(["http://exa mple.com"])
+
+        self.assertEqual(result, 2)
+        self.assertIn("Error: Could not retrieve response headers:", stderr.getvalue())
+        self.assertNotIn("Traceback", stderr.getvalue())
 
 
 class HeaderAnalysisTests(unittest.TestCase):

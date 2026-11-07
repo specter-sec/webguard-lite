@@ -7,6 +7,7 @@ import argparse
 import json
 import re
 import sys
+from http.client import InvalidURL
 from pathlib import Path
 from typing import Mapping
 from urllib.error import HTTPError, URLError
@@ -123,7 +124,7 @@ def fetch_headers(url: str, timeout: float = 8.0) -> tuple[int, Mapping[str, str
     except HTTPError as exc:
         # HTTP error responses still contain useful headers and status information.
         return exc.code, exc.headers
-    except (URLError, TimeoutError, OSError) as exc:
+    except (InvalidURL, URLError, TimeoutError, OSError) as exc:
         reason = getattr(exc, "reason", exc)
         raise RuntimeError(f"Could not retrieve response headers: {reason}") from exc
 
